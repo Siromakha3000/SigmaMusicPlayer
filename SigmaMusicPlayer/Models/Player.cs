@@ -1,51 +1,20 @@
 ﻿using System;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Material.Icons;
 
 namespace SigmaMusicPlayer.Models;
 using Gst;
 using TagLib;
 public class Player
 {
-    private readonly Pipeline _pipeline;
+    private Pipeline _pipeline;
+    public bool IsPipelineNull => _pipeline == null;
+    public bool IsPlaying => _pipeline.CurrentState == State.Playing;
+    public bool IsPaused => _pipeline.CurrentState == State.Paused;
     
     public Player()
     {
         Gst.Application.Init();
-
-
-        // try
-        // {
-        // Gst.Application.Init();
-        // Ensure plugins are loaded
-        // Gst.Application.InitCheck();
-        //
-        // Environment.SetEnvironmentVariable("GST_DEBUG", "3");
-        //     Console.WriteLine($"GStreamer Version: {Gst.Version.Description}");
-        //
-        //     _pipeline = new Pipeline("audio-player");
-        // }
-        // try
-        // {
-        //     // Explicit full initialization
-        //     Gst.Application.Init();
-        //
-        //     Console.WriteLine($"GStreamer Version: {Gst.Version.Description}");
-        //
-        //     // Try creating a simple element first
-        //     var element = ElementFactory.Make("fakesrc", "test-source");
-        //     
-        //     // Then try creating pipeline
-        //     var pipeline = new Pipeline("test-pipeline");
-        //     
-        //     // _pipeline = new Pipeline("playbin");
-        //
-        //     Console.WriteLine("Successfully initialized GStreamer!");
-        // }
-        // catch (Exception e)
-        // {
-        //     Console.WriteLine($"Pipeline Creation Error: {e.Message}");
-        //     Console.WriteLine($"Inner Exception: {e.InnerException?.Message}");
-        //     throw;
-        // }
     }
     
     public SongModel LoadSongModel(string uri)
@@ -53,41 +22,53 @@ public class Player
         File file = File.Create(uri);
         TagLib.Tag tag = file.GetTag(TagTypes.Id3v2);
         TimeSpan duration = TimeSpan.FromSeconds(file.Properties.Duration.TotalSeconds);
+        string tagtitle = tag.Title;
+        string tagartist = string.IsNullOrEmpty(tag.JoinedPerformersSort) ? tag.FirstPerformer : tag.JoinedPerformersSort;
+        string title = string.IsNullOrEmpty(tagtitle) ? System.IO.Path.GetFileNameWithoutExtension(uri) : tagtitle;
+        string artist = string.IsNullOrEmpty(tagartist) ? "Unknown artist" : tagartist;
+        Console.WriteLine($"Title: {tag.Title}, Artist: {tag.JoinedPerformersSort}, Duration: {duration}");
         return new SongModel
         {
             Uri = uri,
-            Title = tag.Title,
-            Artist = tag.FirstPerformer,
+            Title = title,
+            Artist = artist,
             AlbumArtPath = null,
             Duration = duration
         };
     }
-    public void LoadIntoPipeline(SongModel song)
-    {
-        // var source = ElementFactory.Make("filesrc", "file-source");
-        // var decoder = ElementFactory.Make("decodebin", "decoder");
-        // var audioconvert = ElementFactory.Make("audioconvert", "audioconvert");
-        // var audioresample = ElementFactory.Make("audioresample", "audioresample");
-        // var autoaudiosink = ElementFactory.Make("autoaudiosink", "autoaudiosink");
-        // _pipeline.Add(source, decoder, audioconvert, audioresample, autoaudiosink);
-        // Element.Link(source, decoder);
-        // Element.Link(decoder, audioconvert);
-        // Element.Link(audioconvert, audioresample);
-        // Element.Link(audioresample, autoaudiosink);
-        // source["location"] = song.Uri;
-    }
     
     public void LoadIntoPipeline(String uri)
     {
-        var pipeline = (Pipeline)Parse.Launch($"filesrc location={uri} ! decodebin ! audioconvert ! audioresample ! alsasink");
-        if (pipeline == null)
+        // var pipeline = (Pipeline)Parse.Launch($"filesrc location={uri} ! decodebin ! audioconvert ! audioresample ! alsasink");
+        _pipeline = (Pipeline)Parse.Launch($"filesrc location={uri} ! decodebin ! audioconvert ! audioresample");
+        if (_pipeline == null)
         {
             Console.WriteLine("Failed to create pipeline");
+            return;
         }
-        pipeline.SetState(State.Playing);
+        Console.WriteLine("Pipeline created");
+        Play();
     }
     
     public void Play() => _pipeline.SetState(State.Playing);
     public void Pause() => _pipeline.SetState(State.Paused);
+    public void PlayPause()
+    {
+        if (IsPlaying)
+        {
+            Pause();
+        }
+        else
+        {
+            Play();
+        }
+    }
     public void Stop() => _pipeline.SetState(State.Null);
+    public void Seek(TimeSpan position) => _pipeline.Seek(1.0, Format.Time, SeekFlags.Flush | SeekFlags.Accurate, SeekType.Set, position.Ticks, SeekType.None, -1);
+    public void Dispose() => _pipeline.Dispose();
+    
+    ~Player()
+    {
+        Dispose();
+    }
 }

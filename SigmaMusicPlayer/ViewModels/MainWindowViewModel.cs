@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Material.Icons;
 using SigmaMusicPlayer.Models;
 
 namespace SigmaMusicPlayer.ViewModels;
@@ -9,20 +13,54 @@ namespace SigmaMusicPlayer.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     private Player _player;
+    
+    // ui properties
+    // private MaterialIconKind _playButtonIcon = MaterialIconKind.Play;
+    // public MaterialIconKind PlayButtonIcon
+    // {
+    //     get => _playButtonIcon;
+    //     set => SetProperty(ref _playButtonIcon, value);
+    // }
+    
+    [ObservableProperty] private bool _isPlaylistEmpty;
+
+    partial void OnPlaylistChanged(List<SongModel> playlist)
+    {
+        IsPlaylistEmpty = _playlist.Count == 0;
+    }
+    
+    [ObservableProperty]
+    private bool _isPlaying;
+    
+    // playlist properties
+    private PlaylistModel playlistModel;
+    
+    [ObservableProperty]
+    private List<SongModel> _playlist;
+
+    [ObservableProperty]
+    private SongModel _selectedSong;
+
+    partial void OnSelectedSongChanged(SongModel song)
+    {
+        if (song == null)
+        {
+            Console.WriteLine("Selected song is null");
+            return;
+        }
+        Console.WriteLine($"Selected song: {song.Title}");
+        _player.LoadIntoPipeline(song.Uri);
+    }
+    
     public MainWindowViewModel()
     {
-        // Player.Instance();
+        _player = new Player();
+        _isPlaylistEmpty = true;
     }
     
     [RelayCommand]
     public async Task PlayFromFile(Window mainWindow)
     {
-        Console.WriteLine("Command triggered");
-        if (mainWindow == null)
-        {
-            Console.WriteLine("Main window is null");
-            return;
-        }
         // open file dialogue
         OpenFileDialog openFileDialog = new OpenFileDialog();
         openFileDialog.Filters.Add(new FileDialogFilter { Name = "Audio Files", Extensions = { "mp3", "wav", "ogg" } });
@@ -36,16 +74,10 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
         string uri = result![0];
-        Console.WriteLine("Selected file: " + uri);
-        if(_player == null)
-        {
-            _player = new Player();
-        }
-        Console.WriteLine("Loading song model into pipeline");
-        _player.LoadIntoPipeline(uri);
-        Console.WriteLine("Playing " + uri);
-        // _player.Play();
-        // return Task.CompletedTask;
+        var song = _player.LoadSongModel(uri);
+        PlaylistFromSong(song);
+        // load and play the selected file
+        // _player.LoadIntoPipeline(uri);
     }
     
     [RelayCommand]
@@ -58,7 +90,20 @@ public partial class MainWindowViewModel : ViewModelBase
     public void PlayPauseCommand()
     {
         Console.WriteLine("Play/Pause command triggered");
-        _player.Play();
+        if (_player.IsPipelineNull)
+        {
+            Console.WriteLine("No pipeline loaded");
+            return;
+        }
+        _player.PlayPause();
+        IsPlaying = _player.IsPlaying;
+        // PlayButtonIcon = _player.IsPlaying ? MaterialIconKind.Pause : MaterialIconKind.Play;
     }
     
+    public void PlaylistFromSong(SongModel song)
+    {
+        playlistModel = new PlaylistModel("Temporary Playlist", [song], 0);
+        Playlist = playlistModel.Songs;
+        SelectedSong = Playlist.First();
+    }
 }

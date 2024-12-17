@@ -31,29 +31,14 @@
     <Grid RowDefinitions="Auto,*,Auto" Margin="100">
         <!-- Header -->
         <Border Grid.Row="0" Margin="16"
-                Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
-            <Grid ColumnDefinitions="*,Auto,Auto" Margin="2">
-                <!-- Centered Search Field -->
+                    CornerRadius="12"
+                    Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
                 <TextBox Grid.Column="0" 
                          Watermark="Search music..."
                          Width="300"
                          HorizontalAlignment="Center"
                          Margin="0,0,16,0"
                          VerticalAlignment="Center"/>
-                
-                <!-- Settings Icon -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0, 0, 2, 0">
-                    <controls:FloatingButton Classes="Mini">
-                        <Viewbox Stretch="Fill"
-                                 HorizontalAlignment="Stretch"
-                                 VerticalAlignment="Stretch">
-                            <materialIcons:MaterialIcon Kind="Cog" Foreground="White"
-                                                        Height="16"
-                                                        Width="16"/>
-                        </Viewbox>
-                    </controls:FloatingButton>
-                </StackPanel>
-            </Grid>
         </Border>
 
         <!-- Main Content Area -->
@@ -97,7 +82,7 @@
                                                             Height="26"
                                                             Margin="0"
                                                             VerticalAlignment="Center"/>
-                                <TextBlock Text="New Playlist" 
+                                <TextBlock Text="Play from file" 
                                            VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
@@ -138,31 +123,29 @@
                     <TextBlock Text="Active Playlist" 
                                FontWeight="Bold" 
                                Margin="16,16,16,8"/>
-                    <ScrollViewer>
-                        <ListBox>
-                            <!-- Placeholder playlist items -->
-                            <ListBoxItem>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialIcons:MaterialIcon Kind="MusicNote" 
-                                                                Foreground="White"
-                                                                Width="20" 
-                                                                Height="20"
-                                                                Margin="0,0,8,0"/>
-                                    <TextBlock Text="Song 1"/>
-                                </StackPanel>
-                            </ListBoxItem>
-                            <ListBoxItem>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialIcons:MaterialIcon Kind="MusicNote" 
-                                                                Foreground="White"
-                                                                Width="20" 
-                                                                Height="20"
-                                                                Margin="0,0,8,0"/>
-                                    <TextBlock Text="Song 2"/>
-                                </StackPanel>
-                            </ListBoxItem>
+                    <ScrollViewer IsVisible="{Binding !IsPlaylistEmpty}">
+                        <ListBox ItemsSource="{Binding Playlist}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Title}" Margin="0,0,10,0" />
+                                            <TextBlock Text="{Binding Artist}" FontWeight="Light"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="16, 0, 0, 0">
+                                            <TextBlock Text="{Binding Duration.Minutes}"/>
+                                            <TextBlock Text=":"/>
+                                            <TextBlock Text="{Binding Duration.Seconds}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
                         </ListBox>
                     </ScrollViewer>
+                    <TextBlock Text="No active playlist" 
+                               TextAlignment="Center"
+                               IsVisible="{Binding IsPlaylistEmpty}"
+                               Margin="16,16,16,8"/>
                 </StackPanel>
             </Border>
             
@@ -175,20 +158,52 @@
                     <TextBlock Text="Current" 
                                FontWeight="Bold" 
                                Margin="16,16,16,8"/>
-                    <StackPanel>
+                    <StackPanel IsVisible="{Binding IsPlaylistEmpty}">
+                        <Panel VerticalAlignment="Center" 
+                               HorizontalAlignment="Center" 
+                               Margin="16" >
+                            <Button Command="{Binding PlayFromFileCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                                    HorizontalAlignment="Left" 
+                                    VerticalAlignment="Top"
+                                    Margin="0,0,16,16"
+                                    VerticalContentAlignment="Center"
+                                    Width="256"
+                                    Height="256"
+                                    Background="Transparent">
+                                <StackPanel Orientation="Horizontal" 
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Center">
+                                    <materialIcons:MaterialIcon Kind="Play" 
+                                                                Foreground="White"
+                                                                Width="32" 
+                                                                Height="32"
+                                                                Margin="0, 0, 8, 0"
+                                                                VerticalAlignment="Center"/>
+                                    <TextBlock Text="Play from file" 
+                                               VerticalAlignment="Center"
+                                               FontSize="18"/>
+                                </StackPanel>
+                            </Button>
+                        </Panel>
+                        <TextBlock Text="No song selected" 
+                                   FontWeight="Bold" 
+                                   TextAlignment="Center"
+                                   Margin="16,6"/>
+                    </StackPanel>
+                    <StackPanel IsVisible="{Binding !IsPlaylistEmpty}">
                         <Panel VerticalAlignment="Center" 
                                HorizontalAlignment="Center" 
                                Margin="16" >
                             <Image Stretch="UniformToFill" Source="avares://SigmaMusicPlayer/Assets/GeorgeDroyd.jpg"/>
                         </Panel>
-                        <TextBlock Text="Song Name" 
+                        <TextBlock Text="{Binding SelectedSong.Title}" 
                                    FontWeight="Bold" 
                                    TextAlignment="Center"
                                    Margin="16,6"/>
-                        <TextBlock Text="Artist Name" 
+                        <TextBlock Text="{Binding SelectedSong.Artist}" 
                                    TextAlignment="Center"
                                    Margin="16,4"/>
-                        
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -210,19 +225,34 @@
                 <StackPanel Grid.Column="0" 
                             Orientation="Horizontal" 
                             VerticalAlignment="Center">
-                    <Button Background="Transparent" Margin="0,0,8,0">
+                    <Button Background="Transparent" 
+                            IsEnabled="{Binding !IsPlaylistEmpty}"
+                            Margin="0,0,8,0">
                         <materialIcons:MaterialIcon Kind="SkipPrevious" 
                                                     Foreground="White"
                                                     Width="24" 
                                                     Height="24"/>
                     </Button>
-                    <Button Background="Transparent" Margin="0,0,8,0">
-                        <materialIcons:MaterialIcon Kind="Play" 
-                                                    Foreground="White"
-                                                    Width="32" 
-                                                    Height="32"/>
+                    <Button Command="{Binding PlayPauseCommand}"
+                            IsEnabled="{Binding !IsPlaylistEmpty}"
+                            Background="Transparent" 
+                            Margin="0,0,8,0">
+                        <StackPanel>
+                            <materialIcons:MaterialIcon Kind="Play"
+                                                        IsVisible="{Binding !IsPlaying}"
+                                                        Foreground="White"
+                                                        Width="32" 
+                                                        Height="32"/>
+                            <materialIcons:MaterialIcon Kind="Play"
+                                                        IsVisible="{Binding IsPlaying}"
+                                                        Foreground="White"
+                                                        Width="32" 
+                                                        Height="32"/>
+                        </StackPanel>
                     </Button>
-                    <Button Background="Transparent" Margin="0,0,8,0">
+                    <Button Background="Transparent" 
+                            IsEnabled="{Binding !IsPlaylistEmpty}"
+                            Margin="0,0,8,0">
                         <materialIcons:MaterialIcon Kind="SkipNext" 
                                                     Foreground="White"
                                                     Width="24" 
