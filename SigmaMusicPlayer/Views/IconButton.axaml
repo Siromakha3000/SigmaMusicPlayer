@@ -1,0 +1,27 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             VerticalAlignment="Center"
+             HorizontalAlignment="Center"
+                mc:Ignorable="d" d:DesignHeight="64" d:DesignWidth="64"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="SigmaMusicPlayer.Views.IconButton">
+    <Button Command="{Binding Command, RelativeSource={RelativeSource Self}}" 
+            CommandParameter="{Binding CommandParameter, RelativeSource={RelativeSource Self}}"
+            HorizontalAlignment="Left" 
+            VerticalAlignment="Top"
+            Margin="1"
+            VerticalContentAlignment="Center">
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <materialIcons:MaterialIcon Kind="{Binding Kind, RelativeSource={RelativeSource Self}}" 
+                                        Foreground="White"
+                                        Width="26" Height="26"
+                                        VerticalAlignment="Center"/>
+            <TextBlock Text="{Binding Text, RelativeSource={RelativeSource Self}}" 
+                       VerticalAlignment="Center" 
+                       Margin="8,0,0,0"/>
+        </StackPanel>
+    </Button>
+
+</UserControl>

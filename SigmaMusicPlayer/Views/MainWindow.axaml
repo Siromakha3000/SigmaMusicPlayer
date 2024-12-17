@@ -6,6 +6,7 @@
         
         xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         xmlns:controls="clr-namespace:Material.Styles.Controls;assembly=Material.Styles"
+        xmlns:views="clr-namespace:SigmaMusicPlayer.Views"
         x:Class="SigmaMusicPlayer.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
@@ -16,9 +17,10 @@
         ExtendClientAreaToDecorationsHint="False"
         CanResize="False"
         ShowInTaskbar="True"
-        TransparencyLevelHint="Transparent"
         WindowState="Maximized"
-        Background="Transparent">
+        >
+    <!-- Background="Transparent" -->
+    <!-- TransparencyLevelHint="Transparent" -->
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -62,52 +64,68 @@
                     CornerRadius="12"
                     Margin="0">
                 <Panel Margin="8">
-                    <Button HorizontalAlignment="Left" 
-                        VerticalAlignment="Top"
-                        Margin="0,0,0,16"
-                        VerticalContentAlignment="Center">
-                        <StackPanel Orientation="Horizontal" 
-                                VerticalAlignment="Center"
-                                HorizontalAlignment="Center">
-                            <materialIcons:MaterialIcon Kind="Plus" 
-                                                    Foreground="White"
-                                                    Width="26" 
-                                                    Height="26"
-                                                    Margin="0"
-                                                    VerticalAlignment="Center"/>
-                            <TextBlock Text="New Playlist" 
-                                   VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-                    <ScrollViewer Margin="0,48,0,0">
-                    <ItemsControl>
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        
-                        <!-- Placeholder for playlist items -->
-                        <Border Width="180" 
-                                Height="180" 
-                                Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
-                                CornerRadius="12"
-                                Margin="8">
-                            <StackPanel VerticalAlignment="Center" 
+                    <StackPanel Orientation="Horizontal">
+                        <Button HorizontalAlignment="Left" 
+                                VerticalAlignment="Top"
+                                Margin="0,0,16,16"
+                                VerticalContentAlignment="Center">
+                            <StackPanel Orientation="Horizontal" 
+                                        VerticalAlignment="Center"
                                         HorizontalAlignment="Center">
-                                <!-- <materialIcons:MaterialIcon Kind="Music"  -->
-                                <!--                             Foreground="White" -->
-                                <!--                             Width="48"  -->
-                                <!--                             Height="48" -->
-                                <!--                             Margin="0,0,0,16"/> -->
-                                <Image Margin="20" Height="200" Width="200" 
-                                       Source="avares://SigmaMusicPlayer/Assets/GeorgeDroyd.jpg"/>
-                                <TextBlock Text="Playlist Name" 
-                                           HorizontalAlignment="Center"/>
+                                <materialIcons:MaterialIcon Kind="Plus" 
+                                                            Foreground="White"
+                                                            Width="26" 
+                                                            Height="26"
+                                                            Margin="0"
+                                                            VerticalAlignment="Center"/>
+                                <TextBlock Text="New Playlist" 
+                                           VerticalAlignment="Center"/>
                             </StackPanel>
-                        </Border>
-                    </ItemsControl>
-                </ScrollViewer>
+                        </Button>
+                        <Button Command="{Binding PlayFromFileCommand}"
+                                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                                HorizontalAlignment="Left" 
+                                VerticalAlignment="Top"
+                                Margin="0,0,16,16"
+                                VerticalContentAlignment="Center">
+                            <StackPanel Orientation="Horizontal" 
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center">
+                                <materialIcons:MaterialIcon Kind="Play" 
+                                                            Foreground="White"
+                                                            Width="26" 
+                                                            Height="26"
+                                                            Margin="0"
+                                                            VerticalAlignment="Center"/>
+                                <TextBlock Text="New Playlist" 
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <ScrollViewer Margin="0,48,0,0">
+                        <ItemsControl>
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            
+                            <!-- Placeholder for playlist items -->
+                            <Border Width="180" 
+                                    Height="180" 
+                                    Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                                    CornerRadius="12"
+                                    Margin="8">
+                                <StackPanel VerticalAlignment="Center" 
+                                            HorizontalAlignment="Center">
+                                    <Image Margin="20" Height="200" Width="200" 
+                                           Source="avares://SigmaMusicPlayer/Assets/GeorgeDroyd.jpg"/>
+                                    <TextBlock Text="Playlist Name" 
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </ItemsControl>
+                    </ScrollViewer>
                 </Panel>
             </Border>
 
@@ -154,31 +172,24 @@
                     CornerRadius="12"
                     Margin="16,0,0,0">
                 <StackPanel>
-                    <TextBlock Text="Sound Board" 
+                    <TextBlock Text="Current" 
                                FontWeight="Bold" 
                                Margin="16,16,16,8"/>
-                    <ScrollViewer>
-                        <ListBox>
-                            <ListBoxItem>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Bass" Margin="0, 0, 16, 0"/>
-                                    <Slider Width="100" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </ListBoxItem>
-                            <ListBoxItem>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Low" Margin="0, 0, 16, 0"/>
-                                    <Slider Width="100" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </ListBoxItem>
-                            <ListBoxItem>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="High" Margin="0, 0, 16, 0"/>
-                                    <Slider Width="100" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </ListBoxItem>
-                        </ListBox>
-                    </ScrollViewer>
+                    <StackPanel>
+                        <Panel VerticalAlignment="Center" 
+                               HorizontalAlignment="Center" 
+                               Margin="16" >
+                            <Image Stretch="UniformToFill" Source="avares://SigmaMusicPlayer/Assets/GeorgeDroyd.jpg"/>
+                        </Panel>
+                        <TextBlock Text="Song Name" 
+                                   FontWeight="Bold" 
+                                   TextAlignment="Center"
+                                   Margin="16,6"/>
+                        <TextBlock Text="Artist Name" 
+                                   TextAlignment="Center"
+                                   Margin="16,4"/>
+                        
+                    </StackPanel>
                 </StackPanel>
             </Border>
         </Grid>
